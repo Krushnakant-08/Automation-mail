@@ -1,4 +1,6 @@
 .env
 Files
-Sample.xlsx
-student.docx
+*.xlsx
+*.docx
+*.pptx
+*.pdf
