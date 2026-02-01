@@ -59,6 +59,11 @@ for index, row in df.iterrows():
     presentation.Close()
     print(f"Exported to PDF: {pdf_output_path}")
     
+    # Check if email field is empty, skip sending if it is
+    if pd.isna(row['Email']) or str(row['Email']).strip() == '':
+        print(f"-> Skipped email (no email address provided for {row['Name']})")
+        continue
+    
     # Send email with Mailjet API
     try:
         # Read and encode PDF file as base64
