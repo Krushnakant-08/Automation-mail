@@ -1,205 +1,173 @@
-# Automated Document Generation and Email System
+# ANANTYA Participation Certificate Automation
 
-This Python automation system streamlines the process of creating and distributing personalized documents. It reads recipient data from an Excel file, generates customized documents using templates, converts them to PDF format, and automatically emails them to recipients. Perfect for batch processing tasks like certificates, personalized letters, reports, or any document that needs to be customized and distributed to multiple recipients.
+This script automates the generation and distribution of participation certificates for ANANTYA events. It creates personalized PowerPoint certificates, converts them to PDF, and emails them to participants using Mailjet API.
 
-## Features
+## 📋 Prerequisites
 
-- 📊 Excel Integration
-  - Reads recipient data from Excel spreadsheet
-  - Supports multiple recipients in batch processing
-  - Flexible data structure for various use cases
+- Python 3.8 or higher
+- Microsoft PowerPoint (required for PDF conversion)
+- Mailjet account with verified sender email
+- Windows OS (for PowerPoint COM automation)
 
-- 📝 Document Generation
-  - Creates personalized DOCX documents using templates
-  - Supports dynamic content insertion
-  - Maintains consistent formatting across all documents
+## 🚀 Getting Started for Event Coordinators
 
-- 📄 PDF Conversion
-  - Automatically converts DOCX to PDF format
-  - Maintains document formatting and layout
-  - Creates professional-ready documents
+### Step 1: Prepare Your Event Data
 
-- 📧 Automated Email Distribution
-  - Sends personalized emails to each recipient
-  - Includes PDF attachments automatically
-  - Supports custom email messages with recipient's name
-  
-- 🔒 Security Features
-  - Secure email configuration using environment variables
-  - Support for Gmail App Passwords
-  - Protected sensitive information management
+1. Open the main **`anantya.xlsx`** file
+2. Filter the data to show only your event participants:
+   - Click on the **Event** column header
+   - Apply filter to show only your event name
+3. Select and copy all filtered rows (including the header row with Name, Email, Event columns)
+4. Create a new Excel file named **`Sample.xlsx`** in the project folder
+5. Paste your event data into `Sample.xlsx`
+6. Save and close the file
 
-## Requirements
+**Important:** Make sure your `Sample.xlsx` has these columns:
+- `Name` - Participant's full name
+- `Email` - Participant's email address
+- `Event` - Your event name
 
-- Python 3.x
-- Required Python packages:
-  ```sh
-  pandas==2.1.0          # Data handling from Excel
-  python-docx-template   # Document template processing
-  docx2pdf              # PDF conversion
-  python-dotenv         # Environment variable management
-  ```
+### Step 2: Certificate Template
 
-## Project Structure
+The certificate template **`student.pptx`** is already provided in the repository and ready to use.
+
+The template contains placeholders that will be automatically replaced:
+- `{{Name}}` - Replaced with participant's name
+- `{{Event}}` - Replaced with event name
+
+**No customization needed** - just ensure the file exists in the project folder.
+
+### Step 3: Set Up Mailjet API
+
+1. Go to [Mailjet](https://www.mailjet.com/) and create an account (if you don't have one)
+2. On the dashboard, navigate to **API** → **API Key Management**
+3. Copy your **API Key** (Public) and **Secret Key** (Private) 
+
+   **More info given in .env.local**
+
+### Step 4: Configure Environment Variables
+
+1. Locate the **`.env.example`** file in the project folder
+2. Copy it and rename the copy to **`.env`**
+3. Open **`.env`** file in a text editor
+4. Fill in your credentials:
+   ```
+   MJ_APIKEY_PUBLIC=your_actual_public_key_here
+   MJ_APIKEY_PRIVATE=your_actual_private_key_here
+   SENDER_EMAIL=your-verified-email@yourdomain.com
+   SENDER_NAME=Team Anantya
+   ```
+5. Save and close the file
+
+**Important:** Never share your `.env` file with anyone!
+
+### Step 5: Install Dependencies
+
+1. Open PowerShell or Command Prompt in the project folder
+2. Run the following command:
+   ```powershell
+   pip install pandas openpyxl python-pptx pywin32 mailjet_rest python-dotenv
+   ```
+3. Wait for installation to complete
+
+### Step 6: Run the Script
+
+1. Ensure Microsoft PowerPoint is installed and not running
+2. Double-check that:
+   - `Sample.xlsx` has **only** your event data
+   - `certificate.pptx` template exists (already provided in repo)
+   - `.env` file is configured
+3. Open PowerShell in the project folder
+4. Run the script:
+   ```powershell
+   python script.py
+   ```
+
+### What Happens When You Run the Script
+
+The script will:
+1. ✅ Read participant data from `Sample.xlsx`
+2. ✅ Create personalized PPTX certificates in `Files/pptx/` folder
+3. ✅ Convert each PPTX to PDF in `Files/pdfs/` folder
+4. ✅ Send personalized emails with PDF certificates to each participant
+5. ✅ Display progress messages for each step
+
+### Expected Output
+
+```
+Saved: ./Files/pptx/John_Doe_HackathonEvent.pptx
+Exported to PDF: ./Files/pdfs/John_Doe_HackathonEvent.pdf
+-> Successfully sent email with PDF attachment to: john@example.com
+
+Saved: ./Files/pptx/Jane_Smith_HackathonEvent.pptx
+Exported to PDF: ./Files/pdfs/Jane_Smith_HackathonEvent.pdf
+-> Successfully sent email with PDF attachment to: jane@example.com
+
+All documents have been processed and emails sent.
+```
+
+## 📁 Project Structure
 
 ```
 Writing-From-a-Dataset/
 │
-├── script.py           # Main automation script
-├── student.docx        # Document template for personalization
-├── Sample.xlsx         # Data source with recipient information
-├── .env               # Email configuration (not in version control)
-├── .gitignore         # Git ignore configuration
+├── script.py              # Main automation script
+├── Sample.xlsx            # Your event participant data (you create this)
+├── student.pptx          # Certificate template (provided)
+├── .env                  # Your credentials (you create from .env.example)
+├── .env.example          # Template for environment variables
+├── README.md             # This file
 │
-└── Files/             # Generated output directory
-    ├── docx/         # Generated DOCX documents
-    └── pdfs/         # Converted PDF files
+└── Files/
+    ├── pptx/             # Generated PPTX certificates
+    └── pdfs/             # Generated PDF certificates
 ```
 
-## Data File Format
+## ⚠️ Troubleshooting
 
-Your `Sample.xlsx` should include these columns:
-- `Name`: Recipient's full name
-- `Email`: Recipient's email address
+### "FileNotFoundError: Sample.xlsx"
+- Make sure you created `Sample.xlsx` in the project root folder
+- Check the file name spelling (case-sensitive)
 
-Additional columns can be added and referenced in the template using `{{ column_name }}`.
+### "FileNotFoundError: certificate.pptx"
+- The template should already be in the repository
+- If missing, contact **Krushnakant Patil** at [krushnakant.patil24@pccoepune.org](mailto:krushnakant.patil24@pccoepune.org) to get the template file
+- Ensure it's placed in the project root folder
 
-## Installation & Setup
+### Email not sending / Mailjet errors
+- Verify your sender email is validated in Mailjet dashboard
+- Check your API keys are correct in `.env` file
+- Ensure you have sufficient Mailjet email credits
 
-1. **Clone the Repository**
-   ```sh
-   git clone https://github.com/Krushnakant-08/Writing-From-a-Dataset.git
-   cd Writing-From-a-Dataset
-   ```
+### PowerPoint errors
+- Make sure Microsoft PowerPoint is installed
+- Close PowerPoint before running the script
+- Try running the script with administrator privileges
 
-2. **Set Up Virtual Environment (Recommended)**
-   ```sh
-   python -m venv venv
-   # On Windows
-   .\venv\Scripts\activate
-   # On Unix or MacOS
-   source venv/bin/activate
-   ```
+### "Module not found" errors
+- Run: `pip install pandas openpyxl python-pptx pywin32 mailjet_rest python-dotenv`
 
-3. **Install Dependencies**
-   ```sh
-   pip install pandas python-docx-template docx2pdf python-dotenv
-   ```
+## 📧 Email Template
 
-4. **Configure Email Settings**
-   Create a `.env` file in the project root:
-   ```env
-   SENDER_EMAIL=your_email@example.com
-   APP_PASSWORD=your_app_password
-   SMTP_SERVER=smtp.gmail.com
-   ```
-   For Gmail users:
-   1. Enable 2-Factor Authentication
-   2. Generate an App Password
-   3. Use the App Password in the `.env` file
+Participants will receive an email with:
+- **Subject:** Participation Certificate - [Event Name] | ANANTYA
+- **Content:** Professional message congratulating them
+- **Attachment:** PDF certificate
 
-5. **Create Output Directories**
-   ```sh
-   mkdir -p Files/docx Files/pdfs
-   ```
+## 🔒 Security Notes
 
-## Usage Guide
+- Never commit your `.env` file to version control
+- Keep your Mailjet API keys confidential
+- The `.env` file should be added to `.gitignore`
 
-1. **Prepare Your Data**
-   - Populate `Sample.xlsx` with recipient information
-   - Required columns:
-     - `Name`: Full name of the recipient
-     - `Email`: Valid email address
-   - Add any additional columns needed for your template
+## 📞 Support
 
-2. **Customize Document Template**
-   - Edit `student.docx` with your desired content and formatting
-   - Use template variables in double curly braces: `{{ Name }}`
-   - Available variables:
-     - `{{ Name }}`: Recipient's name
-     - `{{ Email }}`: Recipient's email
-     - Add more by including corresponding columns in Excel
+If you encounter any issues:
+1. Check the troubleshooting section above
+2. Verify all prerequisites are met
+3. Contact **Krushnakant Patil** with error messages:
+   - 📧 Email: [krushnakant.patil24@pccoepune.org](mailto:krushnakant.patil24@pccoepune.org)
 
-3. **Run the System**
-   ```sh
-   # Activate virtual environment if used
-   source venv/bin/activate  # Unix/MacOS
-   .\venv\Scripts\activate   # Windows
-   
-   # Run the script
-   python script.py
-   ```
+---
 
-4. **Monitor Progress**
-   The script provides real-time feedback:
-   - Document generation status
-   - PDF conversion confirmation
-   - Email delivery status
-   - Any errors or issues encountered
-
-5. **Check Outputs**
-   - Generated DOCX: `Files/docx/<Name>.docx`
-   - Generated PDF: `Files/pdfs/<Name>.pdf`
-   - Review console output for success/failure logs
-
-## Security Best Practices
-
-- 🔒 Environment Variables
-  - Never commit `.env` file to version control
-  - Keep email credentials secure
-  - Use App Passwords for additional security
-
-- 📁 File Management
-  - Keep sensitive data out of version control
-  - Regularly clean up generated files
-  - Back up templates and data files
-
-## Error Handling
-
-The system includes comprehensive error handling for:
-- ✅ File operations (read/write)
-- ✅ Template processing
-- ✅ PDF conversion
-- ✅ Email delivery
-- ✅ Data validation
-
-Errors are:
-- Logged to console
-- Non-blocking (script continues processing)
-- Informative (clear error messages)
-
-## Troubleshooting
-
-Common issues and solutions:
-1. **Email Sending Fails**
-   - Check internet connection
-   - Verify email credentials in `.env`
-   - Ensure correct SMTP settings
-
-2. **PDF Conversion Issues**
-   - Verify Microsoft Word is installed
-   - Check file permissions
-   - Ensure enough disk space
-
-3. **Template Processing Errors**
-   - Verify variable names match Excel columns
-   - Check template file format
-   - Ensure proper template syntax
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Thanks to all contributors
-- Built with Python and open-source libraries
-- Inspired by the need for efficient document automation
+**Made for ANANTYA Event Coordinators** 🎉

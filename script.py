@@ -1,25 +1,22 @@
 import pandas as pd
 from pptx import Presentation
-import smtplib
-import ssl
-import shutil
 import win32com.client
 import os
-from email.message import EmailMessage
-import os
+import base64
+from mailjet_rest import Client
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
-APP_PASSWORD = os.getenv("APP_PASSWORD")
-SMTP_SERVER = os.getenv("SMTP_SERVER")
-SMTP_PORT = 25 #465
-ssl_context = ssl.create_default_context()
+SENDER_NAME = os.getenv("SENDER_NAME", "Your Name")
+MJ_APIKEY_PUBLIC = os.getenv("MJ_APIKEY_PUBLIC")
+MJ_APIKEY_PRIVATE = os.getenv("MJ_APIKEY_PRIVATE")
+mailjet = Client(auth=(MJ_APIKEY_PUBLIC, MJ_APIKEY_PRIVATE), version='v3.1')
 
 # Read data and set template
 df = pd.read_excel("Sample.xlsx")
-template_path = "./student.pptx"
+template_path = "./certificate.pptx"
 
 # Create output directories if they don't exist
 os.makedirs("./Files/pptx", exist_ok=True)
@@ -62,30 +59,49 @@ for index, row in df.iterrows():
     presentation.Close()
     print(f"Exported to PDF: {pdf_output_path}")
     
-    # Send email
+    # Send email with Mailjet API
     try:
-        msg = EmailMessage()
-        msg['Subject'] = "This is a trial mail"
-        msg['From'] = SENDER_EMAIL
-        msg['To'] = row['Email']
-        
-        body = f"""
-        Hi {row['Name']},
-        This is a trial email with your document attached.
-        """
-        msg.set_content(body.strip())
-        
-    
+        # Read and encode PDF file as base64
         with open(pdf_output_path, 'rb') as f:
             pdf_data = f.read()
-            msg.add_attachment(pdf_data, maintype='application', 
-                             subtype='pdf', 
-                             filename=f"{row['Name']}_{row['Event']}.pdf")
+            pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
         
-        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=ssl_context) as server:
-            server.login(SENDER_EMAIL, APP_PASSWORD)
-            server.send_message(msg)
+        # Prepare Mailjet API data
+        data = {
+            'Messages': [
+                {
+                    "From": {
+                        "Email": SENDER_EMAIL,
+                        "Name": SENDER_NAME
+                    },
+                    "To": [
+                        {
+                            "Email": row['Email'],
+                            "Name": row['Name']
+                        }
+                    ],
+                    "Subject": f"Participation Certificate - {row['Event']} | ANANTYA",
+                    "TextPart": f"Dear {row['Name']},\n\nCongratulations on your participation in {row['Event']} at ANANTYA!\n\nWe are delighted to share your participation certificate with you. Please find the certificate attached to this email.\n\nThank you for being a part of ANANTYA and making the event a grand success.\n\nBest regards,\nTeam ANANTYA",
+                    "HTMLPart": f"<h2>Dear {row['Name']},</h2><p>Congratulations on your participation in <strong>{row['Event']}</strong> at <strong>ANANTYA</strong>!</p><p>We are delighted to share your participation certificate with you. Please find the certificate attached to this email.</p><p>Thank you for being a part of ANANTYA and making the event a grand success.</p><br/><p>Best regards,<br/><strong>Team ANANTYA</strong></p>",
+                    "Attachments": [
+                        {
+                            "ContentType": "application/pdf",
+                            "Filename": f"{row['Name']}_{row['Event']}.pdf",
+                            "Base64Content": pdf_base64
+                        }
+                    ]
+                }
+            ]
+        }
+        
+        # Send email via Mailjet
+        result = mailjet.send.create(data=data)
+        
+        if result.status_code == 200:
             print(f"-> Successfully sent email with PDF attachment to: {row['Email']}")
+        else:
+            print(f"-> Failed to send email to {row['Email']}. Status code: {result.status_code}")
+            print(f"   Response: {result.json()}")
             
     except Exception as e:
         print(f"-> Failed to send email to {row['Email']}. Error: {e}")
