@@ -9,6 +9,17 @@ This script automates the generation and distribution of participation certifica
 - Mailjet account with verified sender email
 - Windows OS (for PowerPoint COM automation)
 
+## ⚠️ Important: Daily Email Limit
+
+**Mailjet allows sending only 200 emails per day to comply with best practices and avoid spam filters.**
+
+If you have more than 200 participants:
+1. The script will send emails to the first 200 participants
+2. After completion, **manually remove the 200 participants who received emails** from `Sample.xlsx`
+3. Save the updated `Sample.xlsx` with only the remaining participants
+4. Run the script again the next day to send emails to the next batch
+5. Repeat this process until all participants receive their certificates
+
 ## 🚀 Getting Started for Event Coordinators
 
 ### Step 1: Prepare Your Event Data
@@ -83,14 +94,33 @@ The template contains placeholders that will be automatically replaced:
    python script.py
    ```
 
+### Step 7: Handling Large Participant Lists (More than 200)
+
+**Important:** Due to the 200 email per day limit:
+
+1. **After the script completes** and sends emails to 200 participants:
+   - Open `Sample.xlsx`
+   - **Manually delete the rows of all participants who received emails** (first 200 rows)
+   - Save the file with only the remaining participants
+   
+2. **The next day:**
+   - Run the script again: `python script.py`
+   - It will send emails to the next 200 participants
+   
+3. **Repeat this process** until all participants receive their certificates
+
+**Tip:** Keep a backup of your original `Sample.xlsx` before making changes, or maintain a separate tracking sheet to know which participants have received emails.
+
 ### What Happens When You Run the Script
 
 The script will:
 1. ✅ Read participant data from `Sample.xlsx`
 2. ✅ Create personalized PPTX certificates in `Files/pptx/` folder
 3. ✅ Convert each PPTX to PDF in `Files/pdfs/` folder
-4. ✅ Send personalized emails with PDF certificates to each participant
+4. ✅ Send personalized emails with PDF certificates to each participant (up to 200 per day)
 5. ✅ Display progress messages for each step
+
+**Note:** If you have more than 200 participants, the script will process all certificates but you should send emails in batches of 200 per day. After sending 200 emails, remove those participants from `Sample.xlsx` and run the script again the next day.
 
 ### Expected Output
 
@@ -153,6 +183,27 @@ Participants will receive an email with:
 - **Subject:** Participation Certificate - [Event Name] | ANANTYA
 - **Content:** Professional message congratulating them
 - **Attachment:** PDF certificate
+
+**Daily Limit:** Maximum 200 emails per day
+
+## 📊 Managing Large Participant Lists
+
+For events with more than 200 participants:
+
+1. **Day 1:**
+   - Run the script with all participants in `Sample.xlsx`
+   - Script sends emails to first 200 participants
+   - Open `Sample.xlsx` and delete the 200 rows of participants who received emails
+   - Save the file
+
+2. **Day 2:**
+   - Run the script again with the updated `Sample.xlsx`
+   - Script sends emails to the next 200 participants
+   - Again, remove those 200 participants from `Sample.xlsx`
+
+3. **Continue** this process until all participants are notified
+
+**Best Practice:** Maintain a master copy of your complete participant list separately to track who has received certificates.
 
 ## 🔒 Security Notes
 
